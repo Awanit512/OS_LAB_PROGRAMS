@@ -1,0 +1,679 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include<string.h>
+static int header=0;
+struct m_blocks{
+char process_id[10];//process_name
+int process_size;
+int memory_block_size;
+int process_start;
+int process_end;
+int process_allocated_flag;
+struct m_blocks *next;
+};
+struct m_blocks *head=NULL;
+int m_size;
+int delete_flag=0;
+
+void allocation(int status);
+void deallocation();
+void print_memory();
+
+int main()
+{
+    printf("variable size partion\n");
+
+
+    printf("enter memory size:");
+    scanf("%d",&m_size);
+
+    int ch=0;
+    int p;
+    while(ch!=4)
+    {printf("\nenter 1,2,3 or 4 for corresponding services\n1)for allocation\n2)for deletion\n3)memory status\n4)for exit\n\nplease enter your choice:");
+    scanf("%d",&ch);
+    switch(ch)
+    {
+    case 1:
+        if (delete_flag==1){
+        printf("\nenter mode of allocating\n1)first fit\n2)best fit\n3)worst fit\n");
+        scanf("%d",&p);
+
+       allocation(p);
+       }
+        else
+        allocation(0);
+        break;
+
+
+    case 2:
+
+        deallocation();break;
+    case 3:
+        print_memory();
+         break;
+    case 4:exit(0);
+        break;
+    default :
+        printf("\nplz enter valid choice\n\n");
+
+    }
+
+
+    }
+    return 0;
+}
+
+
+
+
+
+
+
+
+void allocation(int status)
+{
+
+
+
+struct m_blocks *temp;
+struct m_blocks *p;
+struct m_blocks *t;
+int i,n,prevmax=0,max=0,prevmin=10000,min=10000;
+struct m_blocks *best=NULL;
+struct m_blocks *worst=NULL;
+
+
+    if(status==0)
+{temp=(struct m_blocks*)malloc(sizeof(struct m_blocks ));
+printf("enter process id/name and then enter process size:");
+scanf("%s %d",temp->process_id,&temp->process_size);
+if (temp->process_size>m_size)
+{
+    printf("sorry process is big so can't allocated\n\n");
+    return;
+}
+//printf("enter process size:");
+//scanf("%d",temp->process_size);
+temp->memory_block_size=temp->process_size;
+temp->next=NULL;
+if (header==0)
+{
+    header++;
+    head=temp;
+    head->process_allocated_flag=1;
+    head->process_start=1;
+    head->process_end=1+head->process_size;
+    printf("\nPROCESS ALLOCATED SUCCESFULLY\n\n");
+}
+else{
+p=head;
+    while(p->next)
+    {p=p->next;
+
+    }
+    p->next=temp;
+
+
+
+if(p->process_end+temp->process_size>100)
+{
+   printf("sorry not enough memory so process can't allocated\n\n");
+   return;
+}
+else
+{   p->next=temp;
+    temp->process_start=p->process_end;
+    temp->process_end=temp->process_size+p->process_end;
+    temp->process_allocated_flag=1;
+     printf("\nPROCESS ALLOCATED SUCCESFULLY\n\n");
+
+}
+
+
+
+
+}}
+
+
+
+
+
+
+
+
+
+
+else
+    {
+
+    //first fit
+    if(status==1)
+    {
+    temp=(struct m_blocks*)malloc(sizeof(struct m_blocks ));
+    printf("enter process id/name and then enter process size:");
+    scanf("%s %d",temp->process_id,&temp->process_size);
+    if (temp->process_size>m_size)
+    {
+        printf("sorry process is big so can't allocated\n\n");
+        return;
+    }
+       temp->next=NULL;
+       p=head;
+       while(p)
+       {
+           if(p->process_allocated_flag==0)
+           {if(p->memory_block_size>=temp->process_size){
+               //for(i=0;i<strlen(temp->process_id);i++)
+                strcpy(p->process_id,temp->process_id);
+           p->process_size=temp->process_size;
+           p->process_allocated_flag=1;
+            printf("\nPROCESS ALLOCATED SUCCESFULLY IN FIRST FIT\n\n");
+            break;}
+            else
+                {t=p;
+                while(t)
+
+                {if(t->next && t->next->process_allocated_flag==0)
+                    t=t->next;
+                    else
+                    break;
+                }
+
+                if(t!=p && t)
+                {
+                    if(t->process_end - p->process_start>=temp->process_size)
+                    {strcpy(p->process_id,temp->process_id);
+                 p->process_size=temp->process_size;
+           p->process_allocated_flag=1;
+            printf("\nPROCESS ALLOCATED SUCCESFULLY\n\n");
+            p->process_end=t->process_end;
+            p->next=t->next;//merging all blocks between them
+            p->memory_block_size=p->process_end-p->process_start;
+
+                    }
+
+                }
+
+                p=p->next;
+
+                }
+
+
+            }
+           else
+            p=p->next;
+       }
+       //when p reached to last but that last node has end point of process <100
+       if(!p){t=head;
+                while(t->next)
+                    t=t->next;
+                if(t->process_end+temp->process_size<=101)
+                {t->next=temp;
+           temp->process_end=temp->process_size+t->process_end;
+           temp->process_allocated_flag=1;
+            temp->process_start=t->process_end;
+            temp->next=NULL;
+            temp->memory_block_size=temp->process_end-temp->process_start;
+            printf("\nPROCESS ALLOCATED SUCCESFULLY\n\n");
+
+
+                }
+                else
+                printf("sorry  process can not be  SO ALLOCATED \n\n");
+                }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    if(status==2)
+    {
+            temp=(struct m_blocks*)malloc(sizeof(struct m_blocks ));
+            printf("enter process id/name and then enter process size:");
+            scanf("%s %d",temp->process_id,&temp->process_size);
+    if (temp->process_size>m_size)
+        {
+        printf("sorry process is big so can't allocated\n\n");
+        return;
+        }
+       temp->next=NULL;
+       p=head;
+       while(p)
+        {
+            if(p->process_allocated_flag==0)
+            { if(p->memory_block_size>=temp->process_size)
+                {prevmin=min;
+				min=min>p->memory_block_size?p->memory_block_size:min;
+                best=prevmin>p->memory_block_size?p:best;
+                p=p->next;
+
+                }
+                else
+                {
+                t=p;
+                while(t)
+                {if(t->next && t->next->process_allocated_flag==0)
+                    t=t->next;
+                    else
+                    break;
+                }
+                 if(t!=p && t)
+                {
+                    if(t->process_end - temp->process_start>=temp->process_size)
+                    {
+
+
+            p->process_end=t->process_end;
+            p->next=t->next;//merging all blocks between them
+              p->memory_block_size=p->process_end-p->process_start;
+            if(p->memory_block_size>=temp->process_size)
+                {min=min>p->memory_block_size?p->memory_block_size:min;
+                best=min>p->memory_block_size?p:best;
+                p=p->next;
+
+                }
+                }else p->next;
+
+                }
+            else p->next;
+
+
+                }
+
+             }
+             else  {if(p->memory_block_size-p->process_size>=temp->process_size)
+             {prevmin=min;
+				min=(min>p->memory_block_size)?p->memory_block_size:min;
+                best=(prevmin>p->memory_block_size)?p:best;
+                //printf("max=%d WORST=%d",max,worst->memory_block_size);
+                p=p->next;
+			 }
+			else p=p->next; }
+
+
+
+
+
+        }
+
+
+        if (best)
+        {
+           // for
+                strcpy(best->process_id,temp->process_id);
+                 best->process_size=temp->process_size;
+           best->process_allocated_flag=1;
+            printf("\nPROCESS ALLOCATED SUCCESFULLY\n\n");
+        }
+
+         t=head;
+            while(t->next)
+                t=(t->next);
+            if(t->process_end+temp->process_size<=101 && 101-t->process_end <min)
+                {t->next=temp;
+           temp->process_end=temp->process_size+t->process_end;
+           temp->process_allocated_flag=1;
+            temp->process_start=t->process_end;
+            temp->next=NULL;
+            temp->memory_block_size=101-t->process_end;
+            if(!best)
+            printf("\nPROCESS ALLOCATED SUCCESFULLY\n\n");
+            strcpy(best->process_id,"NONE");
+            best->process_size=0;
+            best->process_allocated_flag=0;
+
+        }
+            else
+{
+			
+if(best && best->process_allocated_flag==0)
+{strcpy(best->process_id,temp->process_id);
+                 best->process_size=temp->process_size;
+           best->process_allocated_flag=1;
+            printf("\nPROCESS ALLOCATED SUCCESFULLY\n\n");
+}
+else if(best && best->process_allocated_flag==1)
+{
+temp->memory_block_size=best->memory_block_size-best->process_size;
+temp->next=best->next;
+worst->next=temp;
+best->process_end=best->process_start+best->process_size;
+best->memory_block_size=best->process_size;
+           temp->process_allocated_flag=1;
+           temp->process_start=best->process_end;
+           temp->process_end=temp->process_size+temp->process_start;
+            printf("\nPROCESS ALLOCATED SUCCESFULLY\n\n");
+}
+else 
+            printf("sorry  process can not be ALLOCATED by worst fit mamory allotment \n\n");
+        }
+        
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    //worst fiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiitttttttttttttt
+
+
+
+
+    if(status==3)
+    {
+            temp=(struct m_blocks*)malloc(sizeof(struct m_blocks ));
+            printf("enter process id/name and then enter process size:");
+            scanf("%s %d",temp->process_id,&temp->process_size);
+    if (temp->process_size>m_size)
+        {
+        printf("sorry process is big so can't allocated\n\n");
+        return;
+        }
+       temp->next=NULL;
+       p=head;
+       while(p)
+        {
+            if(p->process_allocated_flag==0)
+            { if(p->memory_block_size>=temp->process_size)
+                {
+				prevmax=max;
+				max=(max<p->memory_block_size)?p->memory_block_size:max;
+                worst=(prevmax<p->memory_block_size)?p:worst;
+                //printf("max=%d WORST=%d",max,worst->memory_block_size);
+                p=p->next;
+
+                }
+                else
+                {
+                t=p;
+                while(t)
+                {if(t->next && t->next->process_allocated_flag==0)
+                    t=t->next;
+                    else
+                    break;
+                }
+                 if(t!=p && t)
+                {
+                    if(t->process_end - temp->process_start>=temp->process_size)
+                    {
+
+
+            p->process_end=t->process_end;
+            p->next=t->next;//merging all blocks between them
+              p->memory_block_size=p->process_end-p->process_start;
+            if(p->memory_block_size>=temp->process_size)
+                {max=max<p->memory_block_size?p->memory_block_size:max;
+                worst=max<p->memory_block_size?p:worst;
+                p=p->next;
+
+                }
+                }else p->next;
+
+                }
+            else p->next;
+
+
+                }
+
+             }
+             /////////////////////////////////////////////////
+             else {if(p->memory_block_size-p->process_size>=temp->process_size)
+             {prevmax=max;
+				max=(max<p->memory_block_size)?p->memory_block_size:max;
+                worst=(prevmax<p->memory_block_size)?p:worst;
+                //printf("max=%d WORST=%d",max,worst->memory_block_size);
+                p=p->next;
+			 }
+			else p=p->next; }
+
+
+
+
+        }printf("max=%d ",max);
+        
+
+         /*if (worst && worst->process_allocated_flag==0)
+        {
+            //for
+            strcpy(worst->process_id,temp->process_id);
+                 worst->process_size=temp->process_size;
+           worst->process_allocated_flag=1;
+            printf("\nPROCESS ALLOCATED SUCCESFULLY\n\n");
+        }*/
+        
+        
+
+
+        t=head;
+            while(t->next)
+                t=(t->next);
+            if(t->process_end+temp->process_size<=101 && 101-t->process_end> max)
+                {t->next=temp;
+           temp->process_end=temp->process_size+t->process_end;
+           temp->process_allocated_flag=1;
+            temp->process_start=t->process_end;
+            //strcpy(temp->process_id,temp->process_id);
+            temp->next=NULL;
+            temp->memory_block_size=101-t->process_end;
+            
+            printf("\nPROCESS ALLOCATED SUCCESFULLY\n\n");
+            /*strcpy(best->process_id,"NONE");
+            worst->process_size=0;
+            worst->process_allocated_flag=0;*/
+        }
+           else{
+			
+if(worst && worst->process_allocated_flag==0)
+{strcpy(worst->process_id,temp->process_id);
+                 worst->process_size=temp->process_size;
+           worst->process_allocated_flag=1;
+            printf("\nPROCESS ALLOCATED SUCCESFULLY\n\n");
+}
+else if(worst && worst->process_allocated_flag==1)
+{
+temp->memory_block_size=worst->memory_block_size-worst->process_size;
+temp->next=worst->next;
+worst->next=temp;
+worst->process_end=worst->process_start+worst->process_size;
+worst->memory_block_size=worst->process_size;
+           temp->process_allocated_flag=1;
+           temp->process_start=worst->process_end;
+           temp->process_end=temp->process_size+temp->process_start;
+            printf("\nPROCESS ALLOCATED SUCCESFULLY\n\n");
+}
+else 
+            printf("sorry  process can not be ALLOCATED by worst fit mamory allotment \n\n");
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    return ;
+}
+
+
+
+
+
+
+
+
+void deallocation()
+{
+    int choice;
+    char p_name[15];
+    int p_size=0;
+    struct m_blocks *p=head;
+    struct m_blocks *t=head;
+    if(!head)
+        {
+            printf("\n\tno process exist so can not be deleted \n");
+        return ;}
+
+    labl:
+    printf("1)you want to delete process by it name\n2) you want to delete process by it process size\nplease enter your choice:");
+scanf("%d",&choice);
+if(choice==1)
+{printf("enter process name to be deleted /deallocated:");scanf("%s",p_name);
+   while(p)
+   {
+       if(!strcmp(p_name,p->process_id))
+   {
+       strcpy(p->process_id,"NONE");
+       p->process_allocated_flag=0;
+       p->process_size=0;
+       printf("PROCESS DELETED/DEALLOCATED SUCCESFULLY");
+       delete_flag=1;
+
+       break;
+   }
+
+
+   else p=p->next;}
+}
+if(choice==2)
+{printf("enter process size to be deleted /deallocated:");scanf("%d",&p_size);
+p=head;
+      while(p)
+   {
+       if(p->process_size == p_size)
+   {
+       strcpy(p->process_id,"NONE");
+       p->process_allocated_flag=0;
+       p->process_size=0;
+       p=p->next;
+       printf("PROCESS DELETED/DEALLOCATED SUCCESFULLY");
+        delete_flag=1;
+   }
+else
+    p=p->next;}
+}
+
+
+if(!(choice==2 || choice==1))
+{
+    printf("\nenter valid choice\n");
+    goto labl;
+}
+p=head;
+while(p)
+{printf("HI %s",p->process_id);
+
+if(p->process_allocated_flag==0)
+{t=p;
+while(t)
+{
+    if(t->next && t->next->process_allocated_flag==0)
+        t=t->next;
+    else
+        break;
+}
+if(t!=NULL && t!=p)
+{
+    p->next=t->next;
+    p->process_end=t->process_end;
+    strcpy(p->process_id,"NONE");
+    p->process_allocated_flag=0;
+    p->memory_block_size= p->process_end-p->process_start;
+    p=t->next;
+//printf("aage ka saaf kre diya");
+}
+else
+    p=p->next;
+}
+else {p=p->next;//printf("HI %s",p->process_id);}
+}
+return ;
+}
+}
+
+
+
+
+
+
+
+
+
+void print_memory()
+{struct m_blocks *p=head;
+struct m_blocks *t=head;
+int i=0;//external fragmentation
+if(!head)
+{
+    printf("\nempty\n");return ;
+}printf("\n\nMEMORY LAYOUT\n\n");
+printf("process name\tprocess size\t\tmemory size\t\tinternal fragmentation\t\tSTATUS/FLAG\n");
+while(p)
+{
+    if(p->process_allocated_flag==0)
+    {
+        printf("___\t\t_ _ _ _ _\t\t%d\t\t\t_ _ _ _ _ _ \t\t\t%d\n",p->memory_block_size,p->process_allocated_flag);
+        i+=p->memory_block_size-p->process_size;
+        t=p;
+        p=p->next;
+    }
+    else
+    {
+        printf("%s\t\t%d\t\t\t%d\t\t\t\t%d\t\t\t%d\n",p->process_id,p->process_size,p->memory_block_size,p->memory_block_size-p->process_size,p->process_allocated_flag);
+       t=p;
+        i+=p->memory_block_size-p->process_size; p=p->next;
+    }
+
+}
+if(t->process_end<100)
+{
+     printf("___\t\t_ _ _ _ _\t\t%d\t\t\t_ _ _ _ _ _ \t\t\tMEMORY NOT ALLOCATED\n",101-t->process_end);
+        i+=(101-t->process_end);
+}
+printf("\n\tEXTERNAL FRAGMENTATION=%d\n\n",i);
+    return ;
+}
