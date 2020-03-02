@@ -1,0 +1,107 @@
+#include<stdio.h>
+#include<stdlib.h>
+struct process
+{
+	int pid;
+	int at;
+	int bt;
+	int ct;
+	int tat;
+	int wt;
+}p[100];
+
+int n,cpu=0,cw=0;
+int bt[100],finish[100];
+int ind=0;
+int seq[1000];
+
+
+void compute()
+{
+	int i;
+	int time=0,total=n,pos;
+	while(total)
+	{
+		pos=-1;
+		float max=-9999;
+		float temp;
+		
+		for(i=0;i<n;i++)
+		{
+			if(time>=p[i].at && bt[i])
+			{
+				temp=(p[i].bt+(time-p[i].at))/p[i].bt;
+				if(temp>max)
+				{
+					max=temp;
+					pos=i;
+				}
+				if(temp==max)
+				{
+					if(p[i].at<p[pos].at)
+					{
+						pos=i;
+					}
+				}
+			}
+		}
+
+		if(pos==-1)
+		{
+			time++;
+			cpu++;
+			continue;
+		}
+         seq[ind++]=pos;
+		time+=bt[pos];
+		total--;
+		p[pos].ct=time;
+		p[pos].tat=p[pos].ct-p[pos].at;
+		p[pos].wt=p[pos].tat-p[pos].bt;
+		bt[pos]=0;
+	}
+	
+}
+
+int main()
+{
+	printf("enter the no of processes\n");
+	scanf("%d",&n);
+    int i,j;
+    printf("enter the arrival time burst time of each process\n");
+    for(i=0;i<n;i++)
+    {
+    	p[i].pid=i+1;
+    	int a,b;
+    	scanf("%d%d",&a,&b);
+    	p[i].at=a;
+    	bt[i]=b;
+    	p[i].bt=b;
+    	finish[i]=0;
+    }
+
+
+    compute();
+
+    printf("process ::: arrival time ::: brust time ::: completion time ::: turn around time ::: waiting time\n ");
+
+    for(i=0;i<n;i++)
+    {
+    	printf("%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n",p[i].pid,p[i].at,p[i].bt,p[i].ct,p[i].tat,p[i].wt);
+    }
+    
+    printf("sequence\n");
+    for(i=0;i<ind-1;i++)
+    {
+    	if(seq[i]!=seq[i+1])
+    	{
+    		cw++;
+
+    	}
+    	printf("%d\t",seq[i]);
+    }
+    printf("%d\n",seq[ind-1]);
+    printf("cpu ideal time %d\n no of context switching is %d\n",cpu,cw);
+
+	return 0;
+}
